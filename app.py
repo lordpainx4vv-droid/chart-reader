@@ -1,14 +1,12 @@
 import os
 from flask import Flask, render_template_string, request
 from google import genai
-from google.genai import types
 from PIL import Image
 
 app = Flask(__name__)
 
-# Apnar Gemini API key ekhane ba Render Environment Variable e dite paren
-# Ekhane string er bhitor apnar key-ta bosiye dite paren ba niche environment variable use korte paren
-API_KEY = os.environ.get("AQ.Ab8RN6Jg8bp-J4YD8maWBct5CmHT5vNfdPuTt65GsKDW769VgQ", "APNAR_API_KEY_EKHANE_BOSABEN")
+# Apnar dewa API Key
+API_KEY = "AQ.Ab8RN6Jg8bp-J4YD8maWBct5CmHT5vNfdPuTt65GsKDW769VgQ"
 
 client = genai.Client(api_key=API_KEY)
 
@@ -51,10 +49,7 @@ def index():
         file = request.files["file"]
         if file:
             try:
-                # PIL Image load kora
                 image = Image.open(file.stream)
-                
-                # Gemini ke prompt dewa je time soho candle bole dite
                 prompt = (
                     "Analyze this trading chart image. Look at the candles and the corresponding time scale at the bottom. "
                     "List out the candles sequence with their respective times in this exact format:\n"
@@ -62,14 +57,13 @@ def index():
                     "11:20 - RED CANDLE\n"
                     "Provide a clean list of the recent candles visible on the chart."
                 )
-                
                 response = client.models.generate_content(
                     model='gemini-2.5-flash',
                     contents=[image, prompt]
                 )
                 result = response.text
             except Exception as e:
-                result = f"Error: {str.S(e) if hasattr(e, 'S') else str(e)}"
+                result = f"Error: {str(e)}"
                 
     return render_template_string(HTML_TEMPLATE, result=result)
 
